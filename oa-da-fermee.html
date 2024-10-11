@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>OA-DA en économie fermée</title>
+    <link href="https://kineticgraphs.org/css/kg.0.2.7.css" rel="stylesheet" type="text/css">
+    <script src="https://kineticgraphs.org/js/kg.0.2.7.js"></script>
+</head>
+<body>
+
+<div class="kg-container">
+ 
+  schema: EconSchema
+  params:
+    - name: demandShift
+      value: 0
+      min: -100
+      max: 100
+      round: 1
+    - name: supplyShift
+      value: 0
+      min: -100
+      max: 100
+      round: 1
+    - name: LTsupplyShift 
+      value: 0 
+      min: -100
+      max: 100
+      round: 1
+  calcs:
+    demandChanged: ((params.demandShift-0)^2 > 0)
+    supplyChanged: ((params.supplyShift-0)^2 > 0)
+    LTsupplyChanged: ((params.LTsupplyShift-0)^2>0)
+  layout:
+    OneGraph:
+      graph:
+        xAxis:
+          title: PIB ($Y$) 
+          max: 200
+        yAxis:
+          title: Prix ($P$)
+          max: 200
+        objects:
+        - Line:
+            xIntercept: 100
+            label: {text: "OALT", y: 175}
+            lineStyle: dotted
+            color: green
+        - Line:
+            xIntercept: 100 + params.LTsupplyShift
+            label: 
+                text: "OALT'"
+                y: 175
+                show: (calcs.LTsupplyChanged)
+            color: green
+            drag:
+              - horizontal: LTsupplyShift
+        - EconLinearEquilibrium:
+            demand:
+              name: oldDemand
+              label:
+                text: DA
+                x: 175
+              xIntercept: 200
+              invSlope: -1
+              lineStyle: dotted
+              pts:
+              - name: a
+                y: 100
+            supply:
+              yIntercept: 0
+              slope: 1
+              lineStyle: dotted
+              label:
+                text: OACT
+                x: 175
+              pts:
+              - name: a
+                y: 100
+            equilibrium:
+              droplines:
+                vertical: Y_0
+                horizontal: P_0
+        - EconLinearEquilibrium:
+            name: newEquilibrium
+            demand:
+              name: newDemand
+              xIntercept: 200 + params.demandShift
+              invSlope: -1
+              label:
+                text: DA'
+                x: 175
+                show: (calcs.demandChanged)
+              pts:
+              - name: a
+                y: 100
+              drag:
+                - horizontal: demandShift
+            supply:
+              name: newSupply
+              yIntercept: 0 - params.supplyShift
+              slope: 1
+              label:
+                text: OACT'
+                x: 175
+                show: (calcs.supplyChanged)
+              pts:
+              - name: a
+                y: 100
+              drag:
+                - horizontal: supplyShift
+            equilibrium:
+              show: (calcs.demandChanged || calcs.supplyChanged)
+              droplines:
+                vertical: Y_1
+                horizontal: P_1           
+</div>
+
+</body>
+</html>
